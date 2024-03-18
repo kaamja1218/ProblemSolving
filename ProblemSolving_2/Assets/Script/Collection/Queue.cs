@@ -16,12 +16,15 @@ public class Queue : MonoBehaviour
         }
     }
 
-    private Queue<Node> bulletQueue = new Queue<Node>(); // 큐 생성
+    private Node head; // 큐의 맨 앞을 가리키는 노드
+    private Node tail; // 큐의 맨 뒤를 가리키는 노드
     private int count; // 큐에 들어있는 요소의 수
     public GameObject bulletPrefab; // 총알 프리펩
 
     void Start()
     {
+        head = null;
+        tail = null;
         count = 0;
     }
 
@@ -33,7 +36,18 @@ public class Queue : MonoBehaviour
         {
             GameObject bullet = Instantiate(bulletPrefab, new Vector3(-9f, 0f, 0f), Quaternion.identity);
             Node newNode = new Node(bullet);
-            bulletQueue.Enqueue(newNode);
+
+            if (head == null)
+            {
+                head = newNode;
+                tail = newNode;
+            }
+            else
+            {
+                tail.next = newNode;
+                tail = newNode;
+            }
+
             count++;
 
             Debug.Log("Enqueue 함수다. 현재 총알 수: " + count);
@@ -43,10 +57,10 @@ public class Queue : MonoBehaviour
     // 큐에서 요소 제거
     public void DequeueBullet()
     {
-        if (bulletQueue.Count > 0)
+        if (head != null)
         {
-            Node dequeuedNode = bulletQueue.Dequeue();
-            Destroy(dequeuedNode.data);
+            Destroy(head.data);
+            head = head.next;
             count--;
 
             Debug.Log("Dequeue함수다. 현재 총알 수: " + count);
@@ -65,7 +79,7 @@ public class Queue : MonoBehaviour
     // 레드 큐브에 부딪힌 총알을 다시 Queue에 추가
     void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Bullet") && bulletQueue.Count > 0)
+        if (other.CompareTag("Bullet") && count > 0)
         {
             DequeueBullet();
         }
